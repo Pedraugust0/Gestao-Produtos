@@ -49,39 +49,39 @@ public class BancoProdutos {
 	}
 	
 	
-	public void adicionarProduto(Produto produto) {
+	public boolean adicionarProduto(Produto produto) {
 		// verifica se é um adm
 		if(adm!=null) {
 			produto.setId(idAtual++);
 			produtos.add(produto);
 			quantidade++;
-			System.out.println("Produto adicionado.");
+			return true;
 		} else {
-			System.out.println("Apenas administrador tem permissão!");
+			return false;
 		}
 	}
 	
-	public void removerProdutos(Produto produto) {
+	public boolean removerProdutos(Produto produto, Object user) {
 		// verifica se é um adm
-		if(adm!=null) {
+		if(verificarPermissao(user)) {
 			
 			// verifica se o produto está no array
 			if(produtos.contains(produto)) {
 				produtos.remove(produto);
 				quantidade--;
-				System.out.println("Produto removido.");
+				return true;
 			} else {
-				System.out.println("Produto não encontrado.");
+				return false
 			}
 			
 		} else {
-			System.out.println("Apenas administrador tem permissão!");
+			return false;
 			
 		}
 	}
 	
-	public void editarProdutos(long buscarId,Produto produtoAtual) {
-		if(adm!=null) {
+	public boolean editarProdutos(long buscarId,Produto produtoAtual, Object user) {
+		if(verificarPermissao(user)) {
 			for(Produto produto:produtos) {
 				if(produto.getId() == buscarId) {
 				produto.setNome(produtoAtual.getNome());
@@ -90,11 +90,14 @@ public class BancoProdutos {
 				produto.setPreco(produtoAtual.getPreco());
 				System.out.println("Produto editdo.");
 				// finalizar o looping
-				return;
+				return true;
 				}
-			
+				
+				return false;
 			}
 		}
+		
+		return false;
 	}
 	
 	public void listar() {
@@ -122,5 +125,18 @@ public class BancoProdutos {
 		
 		return false;
 	}
+	
+	public boolean verificarPermissao(Object user) {
+		if(user instanceof Administrador) {
+			Administrador adm = (Administrador) user;
+			
+			if(adm.getCargo() == AdministradorCargo.GERENTE || adm.getCargo() == AdministradorCargo.SUPERVISOR_PRODUTOS) {
+				return true;
+			}
+		}
+		
+		return false;
+	}
+	
 	
 }
