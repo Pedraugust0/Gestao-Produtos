@@ -1,12 +1,13 @@
-package model.collection;
+package model.colletction;
 
 import java.util.ArrayList;
+
 import model.entity.Produto;
 import model.entity.Administrador;
-import model.entity.AdministradorCargo;
 
 public class BancoProdutos {
 	private int quantidade;
+	private Administrador adm = new Administrador();
 	private long idAtual = 1;
 	// array para armazenar os produtos
 	private ArrayList<Produto> produtos;
@@ -48,67 +49,78 @@ public class BancoProdutos {
 	}
 	
 	
-	public boolean adicionarProduto(Produto produto, Object user) {
-		
+	public void adicionarProduto(Produto produto) {
 		// verifica se é um adm
-		
-			if(verificarPermissao(user)) {
-				produto.setId(idAtual++);
-				produtos.add(produto);
-				quantidade++;
-				return true;
-			}
-			return false;
+		if(adm!=null) {
+			produto.setId(idAtual++);
+			produtos.add(produto);
+			quantidade++;
+			System.out.println("Produto adicionado.");
+		} else {
+			System.out.println("Apenas administrador tem permissão!");
 		}
+	}
 	
-	
-	public boolean removerProdutos(Produto produto, Object user) {
+	public void removerProdutos(Produto produto) {
 		// verifica se é um adm
-		if(verificarPermissao(user)) {
+		if(adm!=null) {
+			
 			// verifica se o produto está no array
 			if(produtos.contains(produto)) {
 				produtos.remove(produto);
 				quantidade--;
-				return true;
-			}else {
-				return false;
+				System.out.println("Produto removido.");
+			} else {
+				System.out.println("Produto não encontrado.");
 			}
+			
+		} else {
+			System.out.println("Apenas administrador tem permissão!");
+			
 		}
-		return false;
 	}
 	
-	public boolean editarProdutos(long buscarId,Produto produtoAtual, Object user) {
-		
-		if(verificarPermissao(user)) {
+	public void editarProdutos(long buscarId,Produto produtoAtual) {
+		if(adm!=null) {
 			for(Produto produto:produtos) {
 				if(produto.getId() == buscarId) {
 				produto.setNome(produtoAtual.getNome());
 				produto.setDescricao(produtoAtual.getDescricao());
 				produto.setQuantidade(produtoAtual.getQuantidade());
-				produto.setValorProduto(produtoAtual.getValorProduto());
+				produto.setPreco(produtoAtual.getPreco());
+				System.out.println("Produto editdo.");
 				// finalizar o looping
-				return true;
+				return;
 				}
 			
 			}
 		}
-		return false;
-	}
-	
-	public boolean verificarPermissao(Object user) {
-		
-		if(user instanceof Administrador) {
-			Administrador adm = (Administrador) user;
-			
-			if(adm.getCargo() == AdministradorCargo.GERENTE || adm.getCargo() == AdministradorCargo.SUPERVISOR_PRODUTOS) {
-				return true;
-			}
-		}
-		return false;
 	}
 	
 	public void listar() {
 		System.out.println(this.toString());
+	}
+	
+	public boolean vendaProduto(long idProduto, double valorProduto, long idUsuario) {
+		BancoUsuarioPadrao bancoUsuario = new BancoUsuarioPadrao();
+		
+		for(Produto produto:produtos) {
+			if(produto.getId() == idProduto && produto.getQuantidade() > 0) {
+				produto.setQuantidade(produto.getQuantidade() - 1);
+				
+				if(produto.getQuantidade == 0) {
+					System.out.println("O estoque do: " + produto.getNome() + " está 0.");
+				}
+				
+				if(bancoUsuario.comissao(idUsuario, valorProduto) && bancoUsuario.vendaQuantidade(idUsuario)) {
+						return true;
+				}
+			}
+			
+			return false;
+		}
+		
+		return false;
 	}
 	
 }
